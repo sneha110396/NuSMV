@@ -1,0 +1,46 @@
+MODULE main
+
+VAR 
+	sem : {busy, available};
+	P0  : process semaphore(sem);
+	P1  : process semaphore(sem);
+	
+ASSIGN 
+	init(sem) := available;
+
+LTLSPEC
+	(G(P0.state=ready -> F(P0.state=critical))) & (G(P1.state=ready -> F(P1.state=critical)))
+
+LTLSPEC
+	G(!(P0.state=critical & P1.state=critical))
+
+COMPASSION 
+	(P0.state=ready & sem=available , P0.state != ready)
+
+COMPASSION
+	(P1.state=ready & sem=available , P1.state != ready)
+
+	
+
+	
+MODULE semaphore(sem)
+
+VAR
+	state : {idle, ready, critical};
+	
+ASSIGN
+	init(state) := idle;
+	next(state) := case
+				   state=idle : ready;
+				   state=ready & sem=available : critical;
+				   state=ready & sem=busy : ready;
+				   state=critical : idle;
+				   TRUE : state;
+				   esac;
+	next(sem) := case
+	             state=ready & sem=available : busy;
+				 state=critical : available;
+				 TRUE : sem;
+				 esac;
+FAIRNESS
+	running
