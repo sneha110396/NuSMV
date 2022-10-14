@@ -1,0 +1,57 @@
+MODULE main
+
+VAR 
+	k  : {0,1};
+	P0 : process peterson(k, 0, P1);
+	P1 : process peterson(k, 1, P0); 
+
+ASSIGN
+	init(k) :=0;
+
+--starvation freeness	
+LTLSPEC
+	(G(P0.state=request -> F(P0.state=cs))) & (G(P1.state=request -> F(P1.state=cs)))
+
+--mutual exclusion
+LTLSPEC
+	G!(P0.state=cs & P1.state=cs)
+
+--deadlock freeness
+LTLSPEC
+	!(F(G((P0.state=wait) & (P1.state=wait))))
+
+--strict sequencing
+LTLSPEC
+	G((P0.state=cs) -> (G (P0.state=cs) | ((P0.state=cs) U (!(P0.state=cs) & (G (!(P0.state=cs)) | ((!(P0.state=cs)) U (P1.state=cs)))))))
+
+	
+
+MODULE peterson(k, x, other)
+
+VAR 
+	state: {NonCS, request, wait, cs, release};
+	b : boolean;
+	
+ASSIGN 
+	init(state) := NonCS;
+	init(b) := TRUE;
+	next(state) := case
+				   state=NonCS: request;
+				   state=request: wait;
+				   (state=wait) & (k=x) : cs;
+				   (state=wait) & (k=1-x) : wait;
+				   state=cs : release;
+				   state=release : NonCS;
+				   esac;
+	next(b) := case
+	           state=request : FALSE;
+			   state=release : TRUE;
+			   TRUE    : b;
+			   esac;
+	next(k) := case
+	           (state=wait) & (k=1-x) & (other.b = TRUE) : x;
+			   TRUE    : k;
+			   esac;
+FAIRNESS 
+	running
+	
