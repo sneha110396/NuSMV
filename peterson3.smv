@@ -1,0 +1,55 @@
+MODULE main
+
+VAR 
+	turn : {0,1};
+	P0   : process peterson(turn, 0, P1);
+	P1   : process peterson(turn, 1, P0); 
+
+ASSIGN
+	init(turn) :=0;
+
+--mutual exclusion
+LTLSPEC
+	G(!((P0.state=3) & (P1.state=3)))
+
+--starvation freeness
+LTLSPEC
+	(G(P0.state=1 -> F(P0.state=3))) & (G(P1.state=1 -> F(P1.state=3)))
+
+--deadlock freeness
+LTLSPEC
+	!(F(G((P0.state=2) & (P1.state=2))))
+
+--no strict sequencing
+CTLSPEC
+	EF((P0.state=3) & E[(P0.state=3) U (!(P0.state=3) & E[!(P1.state=3) U (P0.state=3)])])
+
+	
+
+MODULE peterson(turn, x, other)
+
+VAR 
+	state: 0..3;
+	interested : boolean;
+	
+ASSIGN 
+	init(state) := 0;
+	init(interested) := FALSE;
+	next(state) := case
+				   
+				   state=2 & turn!=x & other.interested=TRUE : 2;
+				   state=2 & (turn=x | other.interested=FALSE) : 3;
+				   TRUE    : (state+1) mod 4;
+				   esac;
+	next(interested) := case
+	                    state=0 : TRUE;
+						state=3 : FALSE;
+						TRUE    : interested;
+						esac;
+	next(turn) := case
+	              state=1 : 1-x;
+				  TRUE    : turn;
+				  esac;
+FAIRNESS 
+	running
+	
