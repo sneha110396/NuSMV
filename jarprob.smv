@@ -1,0 +1,42 @@
+MODULE main
+
+VAR 
+	small : 0..3;
+	big : 0..5;
+	trans : {emptybig, emptysmall, bigtosmall, smalltobig, fillbig, fillsmall};
+ASSIGN 
+	init(small) := 0;
+	init(big) := 0;
+	next(big) := 
+		case
+		trans = emptybig : 0;
+		trans = fillbig : 5;
+		trans = smalltobig & (small+big) > 5 : 5;
+		trans = smalltobig & (small+big) <=5 : big+small;
+		trans = bigtosmall & (small+big) > 3 : big -(3- small);
+		trans = bigtosmall & (small+big) <= 3: 0;
+		TRUE : big;
+		esac;
+	next(small) := 
+		case
+		trans = emptysmall : 0;
+		trans = fillsmall : 3;
+		trans = smalltobig & (small+big) > 5 : small - (5-big);
+		trans = smalltobig & (small+big) <=5 : 0;
+		trans = bigtosmall & (small+big) > 3 : 3;
+		trans = bigtosmall & (small+big) <= 3: small +big;
+		TRUE : small;
+		esac;
+	next(trans) := 
+		case
+		big=0 : {emptysmall, smalltobig, fillbig, fillsmall};
+		small=0 : {emptybig, bigtosmall, fillbig, fillsmall};
+		big=5 : {fillsmall, bigtosmall, emptybig, emptysmall};
+		small=3 : {fillbig, smalltobig, emptybig, emptysmall};
+		TRUE : trans;
+		esac;
+
+LTLSPEC G(big!=4)
+
+	
+
