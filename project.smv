@@ -37,7 +37,7 @@ DEFINE
 			esac;
 
 
-MODULE main
+MODULE main               			       --the voter
 
 DEFINE
 	HW_PERSISTENCE := 4;                           --hardware persistence 
