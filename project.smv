@@ -1,4 +1,4 @@
-MODULE realWorld
+MODULE realWorld                     -- Generating real world signal values
 
 VAR
 	out : MIN_VAL..MAX_VAL;
@@ -40,25 +40,25 @@ DEFINE
 MODULE main
 
 DEFINE
-	HW_PERSISTENCE := 4;
-	MC_PERSISTENCE := 4;
-    	MC_val_threshold := 3;
+	HW_PERSISTENCE := 4;                           --hardware persistence 
+	MC_PERSISTENCE := 4;                           --miscompare persistence
+    	MC_val_threshold := 3;                         --two sensor miscompare if their signal value differ more than this threshold
 
 VAR
    	rWorld : realWorld();
 	sensor1 : sensor(rWorld);
 	sensor2 : sensor(rWorld);
 	sensor3 : sensor(rWorld);
-	hw_count1: 0..HW_PERSISTENCE;
-	hw_count2: 0..HW_PERSISTENCE;
-	hw_count3: 0..HW_PERSISTENCE;
-	mc_count1: 0..MC_PERSISTENCE;
-	mc_count2: 0..MC_PERSISTENCE;
-	mc_count3: 0..MC_PERSISTENCE;
-	mc_next : 0..MC_PERSISTENCE;
-	isolated1 : boolean;
-	isolated2 : boolean;
-	isolated3 : boolean;
+	hw_count1: 0..HW_PERSISTENCE;                  --variable to measure hardware error persistence of sensor 1
+	hw_count2: 0..HW_PERSISTENCE;                  --variable to measure hardware error persistence of sensor 2
+	hw_count3: 0..HW_PERSISTENCE;                  --variable to measure hardware error persistence of sensor 3
+	mc_count1: 0..MC_PERSISTENCE;                  --variable to measure miscompare persistence of sensor 1 with sensor 2 and 3
+	mc_count2: 0..MC_PERSISTENCE;                  --variable to measure miscompare persistence of sensor 2 with sensor 3 and 1
+	mc_count3: 0..MC_PERSISTENCE;                  --variable to measure miscompare persistence of sensor 3 with sensor 1 snd 2
+	mc_next : 0..MC_PERSISTENCE;                   --variable to measure miscompare persistence of two sensors when the third is isolsted
+	isolated1 : boolean;                           --TRUE if sensor 1 is isolated
+	isolated2 : boolean;                           --TRUE if sensor 2 is isolated
+	isolated3 : boolean;                           --TRUE if sendor 3 is isolated
 	
 
 ASSIGN 
